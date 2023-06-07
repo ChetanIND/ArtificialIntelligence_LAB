@@ -1,48 +1,72 @@
-# import random 
-# def generate value
-# def generate random solution 
-# def hill climbing 
-# def evaluation 
-# def print solution
+#Hill Climbing
+import copy
 
-map = {
-'pune':[('ahmednagar',180), ('nagpur',270)],
-'nagpur': [('ahmednagar',56), ('nashik',69), ('ranjangao',55)],
-'nashik': [('nagpur',80)],
-'beed': [('aurangabad',78)],
-'ranjangao': [('aurangabad',82)],
-'ahmednagar':[('beed',400)],
-'aurangabad': 0
-}
+visited_states = []
 
-def neighbour( graph, pos ):
-    return graph[pos]
+def heuristic(curr_state,goal_state):
+    goal_=goal_state[3]
+    val=0
+    for i in range(len(curr_state)):
+        check_val=curr_state[i]
+        if len(check_val)>0:
+            for j in range(len(check_val)):
+                if check_val[j]!=goal_[j]:
+                    val-=j
+                else:
+                    val+=j
+    return val
+            
+def generate_next(curr_state,prev_heu,goal_state):
+    global visited_states
+    state = copy.deepcopy(curr_state)
+    for i in range(len(state)):
+        temp = copy.deepcopy(state)
+        if len(temp[i]) > 0:
+            elem = temp[i].pop()
+            for j in range(len(temp)):
+                temp1 = copy.deepcopy(temp)
+                if j != i:
+                    temp1[j] = temp1[j] + [elem]
+                    if (temp1 not in visited_states):
+                        curr_heu=heuristic(temp1,goal_state)
+                   
+                        if curr_heu>prev_heu:
+                            child = copy.deepcopy(temp1)
+                            return child
+    
+    return 0
 
-def hill_climbing( graph, pos, total_dist, close_list ):
-    # appending the current position in the closed list
-    close_list.append( pos )
-    # if current position is goal position then printing the path
-    # and exiting
-    if( graph[pos] == 0 ):
-        print("Total distance is :", total_dist )
-        print("Path is :", close_list )
-        return True
-    else:
-    # getting all neighbours from current position
-        n = neighbour( graph, pos )
-        distance = 2000
-        # iterating
-        for loc, dist in n:
-            if( distance > dist ):
-                distance = dist
-                next_loc = loc
-                total_dist += distance
-                # if destination is found then clearing next positions and returning
-            if( hill_climbing( graph, next_loc, total_dist,close_list ) ):
-                n.clear()
-                return True
-            return False
+def solution_(init_state,goal_state):
+    global visited_states
 
-close_list = []
+    if (init_state == goal_state):
+        print (goal_state)
+        print("solution found!")
+        return
+    
+    current_state = copy.deepcopy(init_state)
+    
+    while(True):
 
-hill_climbing( map, 'pune', 0, close_list )
+        visited_states.append(copy.deepcopy(current_state))
+
+        print(current_state)
+        prev_heu=heuristic(current_state,goal_state)
+
+        child = generate_next(current_state,prev_heu,goal_state)
+
+        if child==0:
+            print("Final state - ",current_state)
+            return
+            
+
+        current_state = copy.deepcopy(child)  
+
+def solver():
+    global visited_states
+    init_state = [[],[],[],['B','C','D','A']]
+    goal_state = [[],[],[],['A','B','C','D']]
+    # goal_state = [[],[],[],['A','D','C','B']]
+    solution_(init_state,goal_state)
+
+solver()
